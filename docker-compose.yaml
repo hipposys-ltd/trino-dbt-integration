@@ -1,0 +1,88 @@
+version: "3"
+
+services:
+  trino:
+    image: trinodb/trino
+    container_name: trino
+    networks:
+      data-lake-network:
+    ports:
+      - 8080:8080
+    volumes:
+      - "./trino/trino_connections/postgres.properties:/etc/trino/catalog/postgres.properties"
+      - "./trino/trino_connections/mariadb.properties:/etc/trino/catalog/mariadb.properties"
+      - "./trino/coordinator-config.properties:/etc/trino/config.properties"
+
+  trino-worker:
+    image: trinodb/trino
+    networks:
+      data-lake-network:
+    volumes:
+      - "./trino/trino_connections/postgres.properties:/etc/trino/catalog/postgres.properties"
+      - "./trino/trino_connections/mariadb.properties:/etc/trino/catalog/mariadb.properties"
+      - "./trino/worker-1/worker-config.properties:/etc/trino/config.properties"
+
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: cloudbeaver
+    ports:
+      - "8089:8978"
+    networks:
+      data-lake-network:
+    environment:
+      - CB_SERVER_NAME=CloudBeaver CE Server
+      - CB_SERVER_URL=http://localhost:8089
+      - CB_ADMIN_NAME=TestTest123
+      - CB_ADMIN_PASSWORD=TestTest123
+    restart: unless-stopped
+    volumes:
+      - "./dbeaver_conf/initial-data-sources.conf:/opt/cloudbeaver/conf/initial-data-sources.conf"
+      - "./dbeaver_conf/queries:/opt/cloudbeaver/workspace/GlobalConfiguration/"
+
+  jupyter:
+    build:
+      context: .
+      dockerfile: jupyter/Dockerfile
+    networks:
+      data-lake-network:
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./jupyter/notebooks:/home/jovyan/work
+    environment:
+      - JUPYTER_TOKEN=TestTest123
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password
+      - AWS_REGION=us-east-1
+      - AWS_DEFAULT_REGION=us-east-1
+    command: start-notebook.sh --NotebookApp.token=${JUPYTER_TOKEN}
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      data-lake-network:
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+
+  mariadb:
+    image: mariadb:10.5
+    restart: always
+    networks:
+      data-lake-network:
+    environment:
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+
+networks:
+  data-lake-network: 

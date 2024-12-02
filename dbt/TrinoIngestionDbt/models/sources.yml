@@ -1,0 +1,8 @@
+version: 2
+sources:
+  - name: mariadb
+    database: mariadb
+    schema: db
+    tables:
+      - name: customers
+

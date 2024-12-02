@@ -1,0 +1,1 @@
+select * from dbt.ingestion_customers ic

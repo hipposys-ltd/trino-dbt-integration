@@ -1,0 +1,1 @@
+select * from mariadb.db.customers
