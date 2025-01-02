@@ -48,7 +48,8 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - ./jupyter/notebooks:/home/jovyan/work
+      - ./jupyter/notebooks:/home/jovyan/work/notebooks
+      - ./dbt:/home/jovyan/work/dbt
     environment:
       - JUPYTER_TOKEN=TestTest123
       - AWS_ACCESS_KEY_ID=admin
@@ -60,6 +61,10 @@ services:
   postgres:
     image: postgres:15
     container_name: postgres
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      retries: 5
     ports:
       - "5432:5432"
     networks:
@@ -83,6 +88,19 @@ services:
       - '3306:3306'
     expose:
       - '3306'
+
+  dbtdocs:
+    networks:
+      data-lake-network:
+    build:
+      context: .
+      dockerfile: dbt/.Dockerfile
+    container_name: dbtdocs
+    ports:
+      - "80:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 networks:
   data-lake-network: 

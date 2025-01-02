@@ -1,1 +1,1 @@
-select * from dbt.ingestion_customers ic
+select * from dev_test.maria_db_ingestion_customers

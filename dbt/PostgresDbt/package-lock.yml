@@ -1,0 +1,3 @@
+packages:
+  - local: ../TrinoIngestionDbt
+sha1_hash: 574a9200e86e25239c482c799265b9e46a3730f7
