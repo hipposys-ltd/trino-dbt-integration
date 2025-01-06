@@ -46,7 +46,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install dbt-core==1.8.8 dbt-trino==1.8.3 awscli
 
-      - name: Test Changed Models
+      - name: Build Changed Models
         env:
           TRINO_HOST: ${{ secrets.TRINO_HOST }}
           TRINO_USER: ${{ secrets.TRINO_USER }}
@@ -59,7 +59,7 @@ jobs:
         run: |
           echo "S3 Manifest Path=$MANIFEST_S3_PATH"
           echo "Setting TRINO_SCHEMA dynamically"
-          export TRINO_SCHEMA="dbt_pr_$RUN_ID"
+          export TRINO_SCHEMA="dbt"
           echo "Checking if DBT manifest exists in S3"
           aws s3 cp $MANIFEST_S3_PATH /prod_manifest/manifest.json || echo "Manifest not found, skipping download"
           dbt deps --project-dir dbt/TrinoIngestionDbt --profiles-dir dbt/TrinoIngestionDbt
@@ -70,6 +70,8 @@ jobs:
             echo "No manifest file found. Running full dbt build"
             dbt build --project-dir dbt/TrinoIngestionDbt --profiles-dir dbt/TrinoIngestionDbt
           fi
+          echo "Uploading DBT manifest to S3"
+          aws s3 cp dbt/TrinoIngestionDbt/target/manifest.json $MANIFEST_S3_PATH
 
   run-on-postgres-changed:
     runs-on: ubuntu-latest
@@ -92,7 +94,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install dbt-core==1.8.8 dbt-postgres==1.8.3 awscli
 
-      - name: Test Changed Models
+      - name: Build Changed Models
         env:
           DBT_HOST: ${{ secrets.DBT_HOST }}
           DBT_USER: ${{ secrets.DBT_USER }}
@@ -105,7 +107,7 @@ jobs:
         run: |
           echo "S3 Manifest Path=$MANIFEST_S3_PATH"
           echo "Setting DBT_SCHEMA dynamically"
-          export DBT_SCHEMA="dbt_pr_$RUN_ID"
+          export DBT_SCHEMA="dbt"
           echo "Checking if DBT manifest exists in S3"
           aws s3 cp $MANIFEST_S3_PATH /prod_manifest/manifest.json || echo "Manifest not found, skipping download"
           dbt deps --project-dir dbt/PostgresDbt --profiles-dir dbt/PostgresDbt
@@ -116,4 +118,6 @@ jobs:
             echo "No manifest file found. Running full dbt build"
             dbt build --project-dir dbt/PostgresDbt --profiles-dir dbt/PostgresDbt
           fi
+          echo "Uploading DBT manifest to S3"
+          aws s3 cp dbt/PostgresDbt/target/manifest.json $MANIFEST_S3_PATH
 
