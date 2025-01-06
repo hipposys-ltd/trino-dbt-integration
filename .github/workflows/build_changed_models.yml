@@ -79,7 +79,7 @@ jobs:
     needs:
       - filter
       - run-on-trino-changed
-    if: ${{ always() && needs.filter.outputs.postgres_changed == 'true' }}
+    if: ${{ always() }}
     steps:
       - uses: actions/checkout@v3
 
