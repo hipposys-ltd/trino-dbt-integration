@@ -114,7 +114,7 @@ jobs:
           dbt deps --project-dir dbt/PostgresDbt --profiles-dir dbt/PostgresDbt
           if [ -f /prod_manifest/manifest.json ]; then
             echo "Manifest file found. Running dbt build with --state prod_manifest"
-            dbt build --select "state:modified" --project-dir dbt/PostgresDbt --profiles-dir dbt/PostgresDbt --defer --favor-state --state /prod_manifest
+            dbt build --select "state:modified" --project-dir dbt/PostgresDbt --profiles-dir dbt/PostgresDbt --defer --state /prod_manifest
           else
             echo "No manifest file found. Running full dbt build"
             dbt build --project-dir dbt/PostgresDbt --profiles-dir dbt/PostgresDbt
