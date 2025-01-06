@@ -40,9 +40,7 @@ jobs:
     needs:
       - filter
       - run-on-trino-changed
-    if: >
-      needs.filter.outputs.postgres_changed == 'true' &&
-      (needs['run-on-trino-changed'].result == 'success' || needs['run-on-trino-changed'].result == 'skipped')
+    if: needs.filter.outputs.postgres_changed == 'true'
     steps:
       - name: Echo Postgres Change
         run: echo "Files in Postgres were changed!"
