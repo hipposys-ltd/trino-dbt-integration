@@ -48,7 +48,7 @@ jobs:
       - filter
       - dummy-job
       - run-on-trino-changed
-    if: needs.filter.outputs.postgres_changed == 'true'
+    if: ${{ always() && needs.filter.outputs.postgres_changed == 'true' }}
     steps:
       - name: Echo Postgres Change
         run: echo "Files in Postgres were changed!"
